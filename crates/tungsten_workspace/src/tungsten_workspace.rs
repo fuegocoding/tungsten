@@ -34,6 +34,11 @@ pub use obsidian_config::{
 pub mod index;
 pub use index::{IndexError, IndexStats, NoteIndex, IGNORED_DIRS};
 
+pub mod notes_io;
+pub use notes_io::{
+    render_template, NoteCreateError, NoteCreator, TemplateVars,
+};
+
 mod note_parser;
 mod workspace;
 pub use workspace::{TungstenWorkspace, WorkspaceError};
