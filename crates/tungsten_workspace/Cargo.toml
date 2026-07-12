@@ -20,3 +20,7 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 util.workspace = true
+
+[[bin]]
+name = "tungsten-vault"
+path = "src/bin/tungsten_vault.rs"
