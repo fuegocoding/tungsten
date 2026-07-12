@@ -24,6 +24,8 @@ use std::path::{Path, PathBuf};
 
 pub mod note;
 pub mod obsidian_config;
+pub mod index_db;
+pub use index_db::{IndexDbError, SCHEMA_VERSION};
 
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{

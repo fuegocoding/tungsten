@@ -53,16 +53,16 @@ pub struct IndexStats {
 /// The note index. See module docs.
 #[derive(Debug, Default, Clone)]
 pub struct NoteIndex {
-    notes: BTreeMap<PathBuf, Note>,
-    by_title_lower: HashMap<String, PathBuf>,
-    by_tag: BTreeMap<String, BTreeSet<PathBuf>>,
+    pub(crate) notes: BTreeMap<PathBuf, Note>,
+    pub(crate) by_title_lower: HashMap<String, PathBuf>,
+    pub(crate) by_tag: BTreeMap<String, BTreeSet<PathBuf>>,
     /// Backlinks: lowercased *target title* (the part of a wikilink
     /// before any `#` or `|` separator) → set of source paths.
-    backlinks: HashMap<String, BTreeSet<PathBuf>>,
+    pub(crate) backlinks: HashMap<String, BTreeSet<PathBuf>>,
     /// Outgoing: source path → set of lowercased target titles
     /// referenced from that note. Used for orphan detection and
     /// forward-link resolution.
-    outgoing: BTreeMap<PathBuf, BTreeSet<String>>,
+    pub(crate) outgoing: BTreeMap<PathBuf, BTreeSet<String>>,
 }
 
 impl NoteIndex {
@@ -328,7 +328,7 @@ impl NoteIndex {
 /// Normalize a link target for backlink lookups. Strips a `.md`
 /// extension and a leading `./` so that `[[Note]]`, `[[Note.md]]`,
 /// `[[./Note]]`, and `[[folder/Note]]` all resolve to the same key.
-fn link_key(target: &str) -> String {
+pub(crate) fn link_key(target: &str) -> String {
     let mut t = target.trim().to_string();
     if let Some(stripped) = t.strip_suffix(".md") {
         t = stripped.to_string();

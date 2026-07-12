@@ -265,6 +265,9 @@ edition = "2024"
 
 [workspace.dependencies]
 
+# Third-party
+rusqlite = { version = "0.32", features = ["bundled"] }
+
 #
 # Workspace member crates
 #
