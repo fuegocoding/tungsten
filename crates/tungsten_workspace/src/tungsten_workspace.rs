@@ -29,6 +29,9 @@ pub use obsidian_config::{
     ThemeInfo,
 };
 
+mod workspace;
+pub use workspace::{TungstenWorkspace, WorkspaceError};
+
 /// The name of the per-vault configuration directory.
 ///
 /// Obsidian uses `.obsidian/` (lowercase, dotfile). Tungsten accepts
