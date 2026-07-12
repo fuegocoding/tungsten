@@ -22,13 +22,16 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+pub mod note;
 pub mod obsidian_config;
 
+pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
     ThemeInfo,
 };
 
+mod note_parser;
 mod workspace;
 pub use workspace::{TungstenWorkspace, WorkspaceError};
 
