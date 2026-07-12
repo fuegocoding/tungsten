@@ -39,6 +39,9 @@ pub use notes_io::{
     render_template, NoteCreateError, NoteCreator, TemplateVars,
 };
 
+pub mod search;
+pub use search::{parse_search_query, PropertyFilter, SearchError, SearchMatch, SearchQuery, SearchResult};
+
 mod note_parser;
 mod workspace;
 pub use workspace::{TungstenWorkspace, WorkspaceError};
