@@ -31,6 +31,9 @@ pub use obsidian_config::{
     ThemeInfo,
 };
 
+pub mod index;
+pub use index::{IndexError, IndexStats, NoteIndex, IGNORED_DIRS};
+
 mod note_parser;
 mod workspace;
 pub use workspace::{TungstenWorkspace, WorkspaceError};

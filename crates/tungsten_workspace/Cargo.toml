@@ -23,7 +23,12 @@ serde_json.workspace = true
 serde_yaml.workspace = true
 thiserror.workspace = true
 util.workspace = true
+walkdir.workspace = true
 
 [[bin]]
 name = "tungsten-vault"
 path = "src/bin/tungsten_vault.rs"
+
+[[bin]]
+name = "tungsten-index"
+path = "src/bin/tungsten_index.rs"
