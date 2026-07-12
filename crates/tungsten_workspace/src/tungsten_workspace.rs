@@ -16,9 +16,18 @@
 //!
 //! This crate is the foundation. The M1.x milestones layer the rest of
 //! the knowledge management (graph, tags, backlinks, daily notes,
-//! templates, search) on top of the [`Vault`] type defined here.
+//! templates, search) on top of the [`Vault`] and [`ObsidianConfig`]
+//! types defined here.
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+
+pub mod obsidian_config;
+
+pub use obsidian_config::{
+    AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
+    ThemeInfo,
+};
 
 /// The name of the per-vault configuration directory.
 ///
@@ -59,6 +68,13 @@ impl Vault {
             .to_string()
     }
 
+    /// Load the vault's `.obsidian/` configuration (appearance, themes,
+    /// plugins catalog, snippets, etc.). Returns an error if any
+    /// required file is malformed; missing optional files are skipped.
+    pub fn load_config(&self) -> Result<ObsidianConfig, ObsidianConfigError> {
+        ObsidianConfig::load(self.config_dir())
+    }
+
     /// Detect a vault by walking up from `start` looking for a
     /// `.obsidian/` directory. Returns the *innermost* vault root found,
     /// which matters when a vault is nested inside another vault (rare
@@ -89,6 +105,18 @@ impl Vault {
             None
         }
     }
+}
+
+/// Combined map of a vault's resources (themes, plugins, snippets),
+/// used by the loader to surface what's available without forcing the
+/// caller to walk the directory tree themselves.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct VaultInventory {
+    pub themes: Vec<ThemeInfo>,
+    pub plugins: Vec<PluginInfo>,
+    pub snippets: Vec<String>,
+    pub community_plugin_ids: Vec<String>,
+    pub core_plugins: BTreeMap<String, bool>,
 }
 
 #[cfg(test)]
@@ -178,6 +206,28 @@ mod tests {
         let vault = Vault::open(&dir).unwrap();
         let expected = dir.file_name().unwrap().to_str().unwrap().to_string();
         assert_eq!(vault.name(), expected);
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn load_config_on_minimal_vault() {
+        let dir = unique_temp_dir("load-config");
+        let obsidian = dir.join(".obsidian");
+        fs::create_dir(&obsidian).unwrap();
+        fs::write(
+            obsidian.join("appearance.json"),
+            r##"{"cssTheme": "Minimal", "baseFontSize": 16, "accentColor": "#ff0000"}"##,
+        )
+        .unwrap();
+        fs::write(obsidian.join("app.json"), r#"{"alwaysUpdateLinks": true}"#).unwrap();
+
+        let vault = Vault::open(&dir).unwrap();
+        let cfg = vault.load_config().expect("load_config");
+        assert_eq!(cfg.appearance.css_theme.as_deref(), Some("Minimal"));
+        assert_eq!(cfg.appearance.base_font_size, Some(16));
+        assert_eq!(cfg.appearance.accent_color.as_deref(), Some("#ff0000"));
+        assert!(cfg.app.always_update_links);
+
         fs::remove_dir_all(&dir).ok();
     }
 }
