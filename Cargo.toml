@@ -212,6 +212,7 @@ members = [
     "crates/time_format",
     "crates/title_bar",
     "crates/toolchain_selector",
+    "crates/tungsten_workspace",
     "crates/ui",
     "crates/ui_input",
     "crates/ui_macros",
