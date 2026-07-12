@@ -26,6 +26,8 @@ pub mod note;
 pub mod obsidian_config;
 pub mod index_db;
 pub use index_db::{IndexDbError, SCHEMA_VERSION};
+pub mod rename;
+pub use rename::{RenameError, RenameResult, rewrite_links_in_content};
 
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
