@@ -88,6 +88,10 @@ pub enum LinkKind {
     WikiBlock,
     /// `[[Target##header]]` — wikilink to a sub-heading.
     WikiSection,
+    /// `![[Target]]` — embed. Renders the target inline (note,
+    /// image, PDF page, etc.). The byte range covers the `!` so
+    /// the editor can suppress it on the focused line.
+    Embed,
     /// `[text](Target.md)` — standard markdown link to a `.md` file.
     Markdown,
 }

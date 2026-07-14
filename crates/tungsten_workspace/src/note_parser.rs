@@ -206,9 +206,18 @@ fn collect_code_ranges(body: &str) -> Vec<(usize, usize)> {
 }
 
 /// `[[Target]]`, `[[Target|alias]]`, `[[Target#Heading]]`,
-/// `[[Target#^block]]`, `[[Target##Section]]`.
+/// `[[Target#^block]]`, `[[Target##Section]]`. This regex also
+/// matches `![[...]]` embeds; we filter those out in
+/// `extract_links` by checking whether the match is preceded by
+/// `!`. (The `regex` crate doesn't support look-around.)
 static WIKILINK_RE: LazyRegex = LazyLock::new(|| {
     Regex::new(r"\[\[([^\[\]]+?)\]\]").unwrap()
+});
+
+/// `![[Target]]` — Obsidian embed. Captures the inner target;
+/// `extract_links` computes the `byte_range` to include the `!`.
+static EMBED_RE: LazyRegex = LazyLock::new(|| {
+    Regex::new(r"!\[\[([^\[\]]+?)\]\]").unwrap()
 });
 
 /// `[text](Target)` where Target is non-empty and contains no spaces.
@@ -221,11 +230,38 @@ static MDLINK_RE: LazyRegex = LazyLock::new(|| {
 fn extract_links(body: &str, code_ranges: &[(usize, usize)]) -> Vec<Link> {
     let mut links = Vec::new();
 
+    // First, embeds. The byte range starts at `!` and ends at the
+    // closing `]]`, so the editor knows the full extent to hide
+    // on the focused line.
+    for caps in EMBED_RE.captures_iter(body) {
+        let full = caps.get(0).unwrap();
+        let inner = caps.get(1).unwrap().as_str();
+        let byte_range = full.start()..full.end();
+        if code_ranges.iter().any(|(s, e)| byte_range.start >= *s && byte_range.start < *e) {
+            continue;
+        }
+        let (raw_target, alias) = split_alias(inner);
+        let kind = classify_wikilink(&raw_target);
+        let target = strip_section_hash(&raw_target);
+        links.push(Link {
+            target,
+            alias,
+            kind: LinkKind::Embed,
+            byte_range,
+        });
+    }
+
     for caps in WIKILINK_RE.captures_iter(body) {
         let full = caps.get(0).unwrap();
         let inner = caps.get(1).unwrap().as_str();
         let byte_range = full.start()..full.end();
         if code_ranges.iter().any(|(s, e)| byte_range.start >= *s && byte_range.start < *e) {
+            continue;
+        }
+        // Filter out embeds: if the match is immediately preceded
+        // by `!` (and not inside an `![` like an image with
+        // brackets), the embed regex will catch it.
+        if is_preceded_by_bang(body, byte_range.start) {
             continue;
         }
         let (raw_target, alias) = split_alias(inner);
@@ -273,6 +309,20 @@ fn split_alias(inner: &str) -> (String, Option<String>) {
     } else {
         (inner.to_string(), None)
     }
+}
+
+/// Returns true if the byte at `pos` in `body` is the second
+/// character of a `![[...]]` embed (i.e. `pos - 1` is `!` and
+/// `pos - 2` is not `!`).
+fn is_preceded_by_bang(body: &str, pos: usize) -> bool {
+    if pos == 0 || pos > body.len() {
+        return false;
+    }
+    // The previous char must be `!`. We also want to make sure
+    // the `!` is not part of `!!` (which is an image alt) — but
+    // `!![[X]]` isn't standard, so a single `!` is fine.
+    let prev = body.as_bytes().get(pos - 1).copied();
+    prev == Some(b'!')
 }
 
 fn classify_wikilink(target: &str) -> LinkKind {
@@ -418,6 +468,44 @@ mod tests {
     fn wikilink_in_code_span_is_excluded() {
         let p = parse("don't link: `[[in code]]`");
         assert!(p.links.is_empty());
+    }
+
+    #[test]
+    fn embed_basic_image() {
+        let p = parse("see ![[photo.png]] for context");
+        assert_eq!(p.links.len(), 1);
+        assert_eq!(p.links[0].target, "photo.png");
+        assert_eq!(p.links[0].kind, LinkKind::Embed);
+    }
+
+    #[test]
+    fn embed_note_reference() {
+        let p = parse("![[Note]]");
+        assert_eq!(p.links.len(), 1);
+        assert_eq!(p.links[0].target, "Note");
+        assert_eq!(p.links[0].kind, LinkKind::Embed);
+    }
+
+    #[test]
+    fn embed_with_alias_caption() {
+        let p = parse("![[photo.png|a sunset photo]]");
+        assert_eq!(p.links[0].target, "photo.png");
+        assert_eq!(p.links[0].alias.as_deref(), Some("a sunset photo"));
+        assert_eq!(p.links[0].kind, LinkKind::Embed);
+    }
+
+    #[test]
+    fn embed_in_code_span_excluded() {
+        let p = parse("not really: `![[image.png]]`");
+        assert!(p.links.is_empty());
+    }
+
+    #[test]
+    fn bang_alone_is_not_an_embed() {
+        // `!` without `[[` should not match
+        let p = parse("hello! world [[Note]]");
+        assert_eq!(p.links.len(), 1);
+        assert_eq!(p.links[0].kind, LinkKind::Wiki);
     }
 
     #[test]

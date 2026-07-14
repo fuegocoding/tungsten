@@ -29,6 +29,9 @@ pub use index_db::{IndexDbError, SCHEMA_VERSION};
 pub mod rename;
 pub use rename::{RenameError, RenameResult, rewrite_links_in_content};
 
+pub mod attachments;
+pub use attachments::{mime_from_extension, mime_from_filename, Attachment, AttachmentIndex, AttachmentKind};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

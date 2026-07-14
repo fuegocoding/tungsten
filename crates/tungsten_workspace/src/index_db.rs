@@ -327,6 +327,7 @@ fn link_kind_str(kind: LinkKind) -> &'static str {
         LinkKind::WikiHeading => "wiki-heading",
         LinkKind::WikiBlock => "wiki-block",
         LinkKind::WikiSection => "wiki-section",
+        LinkKind::Embed => "embed",
         LinkKind::Markdown => "markdown",
     }
 }
@@ -337,6 +338,7 @@ fn parse_link_kind(s: &str) -> Option<LinkKind> {
         "wiki-heading" => Some(LinkKind::WikiHeading),
         "wiki-block" => Some(LinkKind::WikiBlock),
         "wiki-section" => Some(LinkKind::WikiSection),
+        "embed" => Some(LinkKind::Embed),
         "markdown" => Some(LinkKind::Markdown),
         _ => None,
     }
