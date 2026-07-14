@@ -109,6 +109,9 @@ pub use theme::{
     ThemeMode, KNOWN_VARIABLES,
 };
 
+pub mod sync;
+pub use sync::{reconcile, write_log, Op, SyncEnvelope, SyncKey, SyncLog, SyncManifest};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

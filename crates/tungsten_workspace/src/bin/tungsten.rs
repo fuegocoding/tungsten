@@ -57,6 +57,7 @@ SUBCOMMANDS:
     index         Rebuild the SQLite index
     query         Run a DQL query
     init          Initialize a vault's sidecar state
+    sync          Encrypt vault state into a sync folder
     help          Print this list
 ";
 
@@ -132,6 +133,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "index" => "tungsten-index",
         "query" => "tungsten-query",
         "init" => "tungsten-init",
+        "sync" => "tungsten-sync",
         _ => return None,
     })
 }

@@ -107,3 +107,7 @@ path = "src/bin/tungsten_themes.rs"
 [[bin]]
 name = "twctl"
 path = "src/bin/tungsten.rs"
+
+[[bin]]
+name = "tungsten-sync"
+path = "src/bin/tungsten_sync.rs"
