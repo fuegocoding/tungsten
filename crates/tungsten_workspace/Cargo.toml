@@ -54,3 +54,7 @@ path = "src/bin/tungsten_backlinks.rs"
 [[bin]]
 name = "tungsten-grep"
 path = "src/bin/tungsten_grep.rs"
+
+[[bin]]
+name = "tungsten-find-broken"
+path = "src/bin/tungsten_find_broken.rs"
