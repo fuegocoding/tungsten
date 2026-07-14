@@ -112,6 +112,9 @@ pub use theme::{
 pub mod sync;
 pub use sync::{reconcile, write_log, Op, SyncEnvelope, SyncKey, SyncLog, SyncManifest};
 
+pub mod yip;
+pub use yip::{YipCell, YipGrid, YipSvg};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
