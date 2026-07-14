@@ -13,15 +13,32 @@
 use std::collections::BTreeMap;
 use std::process::ExitCode;
 
-use tungsten_workspace::NoteIndex;
+use tungsten_workspace::{NoteIndex, Vault};
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 || args[1] == "--help" || args[1] == "-h" {
-        eprintln!("usage: tungsten-index <VAULT_PATH>");
+    if args.iter().any(|a| a == "--help" || a == "-h") {
+        eprintln!(
+            "usage: tungsten-index [--save-db] <VAULT_PATH>\n\
+             \n\
+             Walk the vault, build the in-memory index, and print stats.\n\
+             \n\
+             Options:\n\
+             --save-db    also persist the index to <vault>/.tungsten/index.db"
+        );
         return ExitCode::from(2);
     }
-    let vault = std::path::PathBuf::from(&args[1]);
+    let save_db = args.iter().any(|a| a == "--save-db");
+    let positional: Vec<&String> = args
+        .iter()
+        .skip(1)
+        .filter(|a| !a.starts_with("--"))
+        .collect();
+    if positional.len() != 1 {
+        eprintln!("usage: tungsten-index [--save-db] <VAULT_PATH>");
+        return ExitCode::from(2);
+    }
+    let vault = std::path::PathBuf::from(positional[0]);
     if !vault.is_dir() {
         eprintln!("not a directory: {}", vault.display());
         return ExitCode::from(1);
@@ -80,6 +97,40 @@ fn main() -> ExitCode {
     println!("orphans ({}):", orphans.len());
     for o in &orphans {
         println!("  - {o}");
+    }
+
+    if save_db {
+        // Persist the index to <vault>/.tungsten/index.db. We
+        // require the path to actually be a vault (have a
+        // .obsidian/) so we don't accidentally create sidecar
+        // state in arbitrary folders.
+        match Vault::open(&vault) {
+            Some(vault) => {
+                let db_path = vault.root().join(".tungsten").join("index.db");
+                match index.save_to_sqlite(&db_path) {
+                    Ok(()) => {
+                        let size = std::fs::metadata(&db_path)
+                            .map(|m| m.len())
+                            .unwrap_or(0);
+                        println!();
+                        println!("persisted:        {}", db_path.display());
+                        println!("size:             {} bytes", size);
+                    }
+                    Err(e) => {
+                        eprintln!("save_to_sqlite failed: {e}");
+                        return ExitCode::from(1);
+                    }
+                }
+            }
+            None => {
+                eprintln!(
+                    "--save-db requires a vault ({} has no .obsidian/); \
+                     not writing the sidecar.",
+                    vault.display()
+                );
+                return ExitCode::from(1);
+            }
+        }
     }
 
     ExitCode::SUCCESS
