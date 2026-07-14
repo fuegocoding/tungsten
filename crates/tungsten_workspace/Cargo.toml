@@ -42,3 +42,7 @@ path = "src/bin/tungsten_query.rs"
 [[bin]]
 name = "tungsten-init"
 path = "src/bin/tungsten_init.rs"
+
+[[bin]]
+name = "tungsten-rename"
+path = "src/bin/tungsten_rename.rs"
