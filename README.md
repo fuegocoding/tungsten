@@ -99,6 +99,13 @@ Key paths:
 - `crates/` — Zed's original crates (kept; upstream-trackable).
 - `crates/tungsten_*/` — new Tungsten crates (added by us, in the same
   workspace).
+- `crates/tungsten_workspace/` — the data layer for the
+  knowledge-management stack: vault detection, `.obsidian/` config
+  loader, link graph, sidebar panel data, daily journal, plugin
+  manifest registry, theme system, EaaR encryption, sync log,
+  search/grep/DQL, snippet helper, and 21 CLI binaries
+  (`twctl inspect|outline|switcher|graph|...`). Currently 338
+  passing unit tests.
 - `extensions/tungsten-*/` — Tungsten native extensions (Rust, compiled
   to WASM).
 - `extensions/obsidian-compat-*/` — Obsidian compat shims and bridges
@@ -107,6 +114,23 @@ Key paths:
   Tungsten).
 - `script/` — Zed's build scripts (kept; brand substitutions only).
 - `PRD.md`, `ROADMAP.md` — the source of truth for what we're building.
+
+### Working with the data layer
+
+```bash
+# Build the workspace library and all 21 CLI binaries.
+cargo build -p tungsten_workspace
+
+# Run the full test suite.
+cargo test -p tungsten_workspace
+
+# Inspect a vault.
+./target/debug/tungsten-inspect ~/Notes
+./target/debug/tungsten-validate ~/Notes  # exits non-zero on any check failure
+
+# Drive the data layer programmatically from another Rust crate.
+# (See `tungsten_workspace` re-exports; every module is a small
+#  data-only API with no GUI dependency.)
 
 ## License
 
