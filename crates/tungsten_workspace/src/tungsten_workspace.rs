@@ -32,6 +32,13 @@ pub use rename::{RenameError, RenameResult, rewrite_links_in_content};
 pub mod attachments;
 pub use attachments::{mime_from_extension, mime_from_filename, Attachment, AttachmentIndex, AttachmentKind};
 
+pub mod dql;
+pub use dql::{
+    execute as dql_execute, parse_query as dql_parse_query, tokenize as dql_tokenize, CompareOp,
+    DqlError, DqlNoteRow, DqlQuery, DqlResult, DqlRow, FromClause, Ident, Keyword, Literal,
+    SourceType, Token, WhereClause, WhereNode,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

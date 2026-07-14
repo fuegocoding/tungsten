@@ -336,7 +336,7 @@ fn substitute_target(raw_target: &str, _old: &str, new: &str) -> String {
     if let Some(idx) = raw_target.find('#') {
         let suffix = &raw_target[idx..];
         format!("{}{}", new, suffix)
-    } else if let Some(stripped) = raw_target.strip_suffix(".md") {
+    } else if raw_target.strip_suffix(".md").is_some() {
         format!("{}.md", new)
     } else if let Some(idx) = raw_target.rfind(['/', '\\']) {
         let prefix = &raw_target[..idx + 1];

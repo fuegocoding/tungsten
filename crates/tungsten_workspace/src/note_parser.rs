@@ -241,7 +241,7 @@ fn extract_links(body: &str, code_ranges: &[(usize, usize)]) -> Vec<Link> {
             continue;
         }
         let (raw_target, alias) = split_alias(inner);
-        let kind = classify_wikilink(&raw_target);
+        let _ = classify_wikilink(&raw_target);
         let target = strip_section_hash(&raw_target);
         links.push(Link {
             target,
