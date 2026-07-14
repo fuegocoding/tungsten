@@ -44,6 +44,9 @@ pub use vault_sidecar::{
     ensure_sidecar_dir, read_state, write_state, VaultState, STATE_SCHEMA_VERSION,
 };
 
+pub mod watcher;
+pub use watcher::{NoteEvent, NoteWatcher, WatcherError};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
