@@ -124,6 +124,9 @@ pub use templates::{default_vars, discover as discover_templates, format_date_to
 pub mod export;
 pub use export::{build_export, Export, ExportCallout, ExportLink, ExportNote, ExportStats};
 
+pub mod validate;
+pub use validate::{validate, Check, ValidationReport};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
