@@ -103,3 +103,7 @@ path = "src/bin/tungsten_plugins.rs"
 [[bin]]
 name = "tungsten-themes"
 path = "src/bin/tungsten_themes.rs"
+
+[[bin]]
+name = "twctl"
+path = "src/bin/tungsten.rs"
