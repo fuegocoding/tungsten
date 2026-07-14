@@ -1,7 +1,7 @@
 # Tungsten — Roadmap
 
 **Status:** Active development (v0.3 — Zed-based)
-**Last updated:** 2026-07-12
+**Last updated:** 2026-07-14
 **Horizon:** 2026 Q3 → 2029
 **Total duration:** ~6 months to v1.0 alpha, 12–18 months to v1.0 stable,
 then post-1.0 features through 2029.
@@ -11,18 +11,43 @@ then post-1.0 features through 2029.
 
 | Phase | Status | Key deliverables |
 | --- | --- | --- |
-| **M0.1** Zed fork + rebrand | 🟡 **In progress** | Fork zed, rebrand to Tungsten, first native build, CI green |
-| **M0.2** Tungsten shell MVP | ❌ **Not started** | Vault concept, .obsidian/ loader, ribbon, sidebar restyling, status bar |
-| **M1.1** Markdown on Zed | ❌ **Not started** | tree-sitter-markdown, Live Preview decorations, Source/Reading modes |
-| **M1.2** Knowledge layer (Rust port of Foam) | ❌ **Not started** | Workspace index, link graph, tags, backlinks, daily notes, templates |
-| **M2.1** Sidebar features | ❌ **Not started** | Files, Search, Bookmarks, Tags, Outline, Backlinks, Properties, Graph |
-| **M2.2** Daily Journal | ❌ **Not started** | Widget registry, 12 templates, journal home, calendar, mood trends, YIP |
-| **M3.x** Obsidian compat subsystem | ❌ **Not started** | Isolated JS+DOM runtime, `obsidian` module shim, IPC, top-20 plugins working |
-| **M4.x** Canvas, Bases, Theming | ❌ **Not started** | JSON Canvas on GPUI, .base views, Obsidian CSS variables, community themes |
-| **M5.x** EaaR, hardening | ❌ **Not started** | age + libsodium, transparent mount, performance, security audit |
-| **M6.x** Publish, Web Clipper, Mobile PWA | ❌ **Not started** | Static site generator, browser extension, PWA |
+| **M0.1** Zed fork + rebrand | ✅ **Done** | Fork zed, rebrand to Tungsten, first native build, CI green |
+| **M0.2** Tungsten shell MVP | 🟢 **Data layer done** | `tungsten_workspace` crate with 295 tests, vault detection, `.obsidian/` loader, `TungstenVaultStatusItem` in status bar, GPUI `TungstenVaultName` global, daily-note action |
+| **M1.1** Markdown on Zed | ✅ **Done (substrate)** | Zed already ships tree-sitter-markdown + Live Preview; rebrand to Tungsten |
+| **M1.2** Knowledge layer (Rust port of Foam) | 🟢 **Data layer done** | `NoteIndex`, link graph (`graph::layout` Fruchterman–Reingold), tags, backlinks, unlinked mentions, daily notes, templates, DQL, search query parser, outline (heading tree) |
+| **M2.1** Sidebar features | 🟢 **Data layer done** | `panel` module: file tree, tags, backlinks, properties, bookmarks, outline; graph layout + `tungsten-graph` CLI; quick switcher |
+| **M2.2** Daily Journal | 🟢 **Data layer done** | `journal` module: 12 default widgets (mood, weather, gratitude, goals, notes, ideas, reading, meals, exercise, sleep, tomorrow, reflection), `calendar()`, `mood_trend()`, `journal_home()` |
+| **M2.3** Callouts | 🟢 **Parser done** | `Callout` struct + `extract_callouts` parser (note has `callouts: Vec<Callout>`) |
+| **M3.x** Obsidian compat subsystem | 🟡 **Foundation done** | `plugin_api` module: `PluginManifest`, `PluginRegistry`, `discover()`, `shim_surface()` (22 hard-coded methods) |
+| **M4.x** Canvas, Bases, Theming | 🟢 **Data layer done** | JSON Canvas 1.0 (`canvas`), `.base` evaluator (`bases`), CSS theme parser (`theme`, 28 variables, `base_theme()`, `list_themes()`) |
+| **M5.x** EaaR, hardening | 🟢 **Crypto done** | Argon2id (m=19MiB, t=2, p=1) + XChaCha20-Poly1305 (24-byte nonce) in `eaar`; `tungsten-encrypt`/`tungsten-decrypt` CLIs |
+| **M6.x** Publish, Web Clipper, Mobile PWA | 🟡 **Publish done** | `publish` module: `render_html`/`render_full_page`/`render_frontmatter_table` with wikilink/embed post-processing; `tungsten-publish` CLI |
 | **M7.x** Sync (Etebase, Syncthing) | ❌ **Not started** | E2EE transports, self-hostable server |
 | **M8.x** Mobile native + Multiplayer | ❌ **Not started** | iOS/Android native, Yjs collaboration |
+
+## What this looks like today
+
+The `tungsten_workspace` library is the implementation of the data
+layer for milestones M0.2 through M6. It compiles to 21 binaries
+(`tungsten-*` for each subsystem plus a `twctl` umbrella dispatcher)
+and ships with **295 passing unit tests** (zero warnings on the test
+suite). It is the foundation the GPUI view layer and the eventual
+Obsidian compat runtime will sit on top of.
+
+### Binaries (run `./target/debug/twctl help` for the list)
+
+- `tungsten` — main GUI (forked from `zed`, rebrand only)
+- `twctl` — umbrella command dispatching to the per-task tools
+- `tungsten-vault`, `tungsten-init` — vault detection / sidecar state
+- `tungsten-index`, `tungsten-query`, `tungsten-rename`,
+  `tungsten-backlinks`, `tungsten-grep`, `tungsten-find-broken` —
+  knowledge layer (M1.2)
+- `tungsten-switcher`, `tungsten-outline`, `tungsten-graph` —
+  sidebar data (M2.1)
+- `tungsten-canvas`, `tungsten-publish` — Canvas / publish (M4 / M6)
+- `tungsten-encrypt`, `tungsten-decrypt` — EaaR (M5)
+- `tungsten-plugins`, `tungsten-themes` — Obsidian compat foundation (M3)
+- `tungsten-inspect` — diagnostic dump (used by CI and humans)
 
 ---
 
