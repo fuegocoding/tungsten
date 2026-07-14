@@ -83,3 +83,7 @@ path = "src/bin/tungsten_eaar.rs"
 [[bin]]
 name = "tungsten-graph"
 path = "src/bin/tungsten_graph.rs"
+
+[[bin]]
+name = "tungsten-switcher"
+path = "src/bin/tungsten_switcher.rs"
