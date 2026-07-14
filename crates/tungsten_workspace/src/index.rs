@@ -54,6 +54,9 @@ pub struct IndexStats {
 #[derive(Debug, Default, Clone)]
 pub struct NoteIndex {
     pub(crate) notes: BTreeMap<PathBuf, Note>,
+    /// Case-insensitive title → path. Keys are the note's H1
+    /// (lower-cased) AND the file's basename (lower-cased, with
+    /// `.md` stripped). Either lookup returns the same path.
     pub(crate) by_title_lower: HashMap<String, PathBuf>,
     pub(crate) by_tag: BTreeMap<String, BTreeSet<PathBuf>>,
     /// Backlinks: lowercased *target title* (the part of a wikilink
@@ -129,6 +132,18 @@ impl NoteIndex {
 
         let title_lower = note.title.to_lowercase();
         self.by_title_lower.insert(title_lower.clone(), path.to_path_buf());
+        // Also index the file's basename (without .md). This
+        // means `by_title("new")` finds a file `New.md` even when
+        // its H1 is "Old" — and after a rename, `by_title("New")`
+        // finds the newly-named file regardless of its H1.
+        if let Some(basename) = path.file_stem().and_then(|s| s.to_str()) {
+            let basename_lower = basename.to_lowercase();
+            if basename_lower != title_lower {
+                self.by_title_lower
+                    .entry(basename_lower)
+                    .or_insert(path.to_path_buf());
+            }
+        }
         for tag in &note.tags {
             self.by_tag
                 .entry(tag.clone())
@@ -611,6 +626,56 @@ mod tests {
         assert!(idx.get(&path).is_none());
         let bl: Vec<&str> = idx.backlinks("Target").map(|n| n.title.as_str()).collect();
         assert!(bl.is_empty(), "no one links to Target after removal");
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn by_title_finds_by_filename_when_h1_differs() {
+        let dir = unique_vault("filename-lookup");
+        // Note whose H1 is "Daily" but the file is "Journal.md".
+        write(
+            &dir,
+            "Journal.md",
+            "# Daily\n\nbody\n",
+        );
+        let idx = NoteIndex::build(&dir).unwrap();
+        // by_title should find it by either H1 or filename.
+        assert!(idx.by_title("Daily").is_some());
+        assert!(
+            idx.by_title("journal").is_some(),
+            "by_title should resolve by filename basename (case-insensitive)"
+        );
+        assert!(idx.by_title("Journal").is_some());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn by_title_finds_by_filename_after_rename() {
+        let dir = unique_vault("rename-lookup");
+        // Note whose H1 matches its filename; rename the file.
+        let old = write(&dir, "OldName.md", "# OldName\nbody\n");
+        let mut idx = NoteIndex::build(&dir).unwrap();
+        assert!(idx.by_title("OldName").is_some());
+        assert!(idx.by_title("oldname").is_some());
+        idx.rename(&old, &dir.join("NewName.md")).unwrap();
+        // After the rename, the file's basename is "NewName" but
+        // its H1 is still "OldName" (H1s don't auto-update on
+        // rename in Obsidian). Both lookups should still work.
+        assert!(
+            idx.by_title("NewName").is_some(),
+            "by_title should find the renamed file by its new filename"
+        );
+        assert!(
+            idx.by_title("newname").is_some(),
+            "case-insensitive filename lookup"
+        );
+        assert!(
+            idx.by_title("OldName").is_some(),
+            "by_title should still find the renamed file by its old H1"
+        );
+        // Backlinks of the new filename point at the renamed file.
+        // (We didn't write any backlinks, so this is empty.)
+        let _ = idx.backlinks("NewName").count();
         fs::remove_dir_all(&dir).ok();
     }
 
