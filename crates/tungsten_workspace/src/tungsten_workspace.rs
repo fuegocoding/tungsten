@@ -73,6 +73,9 @@ pub use property::{
     PropertySchemaSet,
 };
 
+pub mod graph;
+pub use graph::{build_graph, layout, Edge, ForceParams, Layout, Node, Position};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

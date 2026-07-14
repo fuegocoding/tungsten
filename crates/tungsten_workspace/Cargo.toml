@@ -79,3 +79,7 @@ path = "src/bin/tungsten_eaar.rs"
 [[bin]]
 name = "tungsten-decrypt"
 path = "src/bin/tungsten_eaar.rs"
+
+[[bin]]
+name = "tungsten-graph"
+path = "src/bin/tungsten_graph.rs"
