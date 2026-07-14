@@ -53,6 +53,9 @@ pub use canvas::{
     GroupNode, LinkNode, NodeBase, Side, TextNode,
 };
 
+pub mod publish;
+pub use publish::{render_full_page, render_frontmatter_table, render_html};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
