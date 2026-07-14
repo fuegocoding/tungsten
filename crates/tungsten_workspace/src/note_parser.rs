@@ -46,6 +46,8 @@ pub(crate) struct ParsedNote {
     pub links: Vec<Link>,
     /// Extracted tags, normalized to lowercase, without the leading `#`.
     pub tags: Vec<String>,
+    /// Callout blocks.
+    pub callouts: Vec<crate::Callout>,
 }
 
 /// Parse a note's body into structured form.
@@ -60,11 +62,15 @@ pub(crate) fn parse(content: &str) -> ParsedNote {
     // Title = first H1 in the body.
     let title = first_h1(body);
 
+    // Callouts (M2.3): `> [!type] Title\n> body\n> more`.
+    let callouts = extract_callouts(body);
+
     ParsedNote {
         title,
         frontmatter,
         links,
         tags,
+        callouts,
     }
 }
 
@@ -405,6 +411,67 @@ fn first_h1(body: &str) -> Option<String> {
     None
 }
 
+/// Extract callout blocks from the body. A callout is a sequence
+/// of consecutive `>` lines, the first of which matches
+/// `> [!type] Title` (the type is required, the title is
+/// optional). A blank line ends the callout.
+fn extract_callouts(body: &str) -> Vec<crate::Callout> {
+    use std::sync::LazyLock;
+    use regex::Regex;
+
+    static CALLOUT_OPEN: LazyLock<Regex> = LazyLock::new(|| {
+        // `> [!type]` or `> [!type] Title` at the start of a line.
+        // `[^\s\[\]]+` for the type so we don't match `[!note]`-
+        // like arrays; the type is a single token.
+        Regex::new(r"^>\s*\[!([^\s\[\]]+)\]\s*(.*)$").unwrap()
+    });
+    static QUOTE_PREFIX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^>\s?(.*)$").unwrap());
+
+    let mut out = Vec::new();
+    let mut lines = body.split_inclusive('\n').peekable();
+    while let Some(line) = lines.next() {
+        // Strip the trailing newline for matching; we'll preserve
+        // it in the byte range.
+        let line_no_nl = line.trim_end_matches(['\r', '\n']);
+        let Some(caps) = CALLOUT_OPEN.captures(line_no_nl) else {
+            continue;
+        };
+        let kind = caps.get(1).unwrap().as_str().to_string();
+        let title = {
+            let t = caps.get(2).unwrap().as_str().trim();
+            if t.is_empty() { None } else { Some(t.to_string()) }
+        };
+        let start = line_no_nl.as_ptr() as usize - body.as_ptr() as usize;
+        let mut end = start + line_no_nl.len();
+        // Consume continuation `> ` lines (with or without
+        // content) until a non-`>` line or EOF.
+        while let Some(next) = lines.peek() {
+            let next_no_nl = next.trim_end_matches(['\r', '\n']);
+            // A callout continuation starts with `>` (after
+            // optional whitespace). A blank line ends the
+            // callout.
+            if QUOTE_PREFIX.is_match(next_no_nl) || next_no_nl.trim() == ">" {
+                end = (next_no_nl.as_ptr() as usize - body.as_ptr() as usize)
+                    + next_no_nl.len();
+                lines.next();
+            } else if next_no_nl.trim().is_empty() {
+                // Blank line: end the callout here. We don't
+                // consume the blank line.
+                break;
+            } else {
+                break;
+            }
+        }
+        out.push(crate::Callout {
+            kind,
+            title,
+            byte_range: start..end,
+        });
+    }
+    out
+}
+
 /// Sentinel for tests to keep the `Range` import live if all
 /// in-file uses go away.
 #[allow(dead_code)]
@@ -578,5 +645,55 @@ mod tests {
         let p = parse("[[B]] then [[A]]");
         assert_eq!(p.links[0].target, "B");
         assert_eq!(p.links[1].target, "A");
+    }
+
+    #[test]
+    fn callout_simple_note() {
+        let p = parse("> [!note]\n> Body text\n");
+        assert_eq!(p.callouts.len(), 1);
+        assert_eq!(p.callouts[0].kind, "note");
+        assert_eq!(p.callouts[0].title, None);
+    }
+
+    #[test]
+    fn callout_with_title() {
+        let p = parse("> [!warning] Watch out\n> Details here\n");
+        assert_eq!(p.callouts.len(), 1);
+        assert_eq!(p.callouts[0].kind, "warning");
+        assert_eq!(p.callouts[0].title.as_deref(), Some("Watch out"));
+    }
+
+    #[test]
+    fn callout_continuation_lines() {
+        let p = parse("> [!tip] Hint\n> First\n> Second\n> Third\n");
+        assert_eq!(p.callouts.len(), 1);
+        let body_bytes = p.callouts[0].byte_range.len();
+        assert!(body_bytes > 0);
+        assert_eq!(p.callouts[0].kind, "tip");
+    }
+
+    #[test]
+    fn callout_ends_at_blank_line() {
+        let body = "> [!note] A\n> in callout\n\nAfter\n";
+        let p = parse(body);
+        assert_eq!(p.callouts.len(), 1);
+        let end = p.callouts[0].byte_range.end;
+        let after = &body[end..];
+        assert!(after.starts_with("\n\n") || after.starts_with('\n'));
+    }
+
+    #[test]
+    fn callout_not_in_regular_quote() {
+        let p = parse("> Just a quote\n> no callout syntax\n");
+        assert!(p.callouts.is_empty());
+    }
+
+    #[test]
+    fn multiple_callouts() {
+        let body = "> [!note] A\n\n> [!tip] B\n> body\n";
+        let p = parse(body);
+        assert_eq!(p.callouts.len(), 2);
+        assert_eq!(p.callouts[0].kind, "note");
+        assert_eq!(p.callouts[1].kind, "tip");
     }
 }

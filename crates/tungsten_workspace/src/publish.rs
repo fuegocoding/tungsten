@@ -228,6 +228,7 @@ mod tests {
             frontmatter: parsed.frontmatter,
             links: parsed.links,
             tags: parsed.tags,
+            callouts: parsed.callouts,
             mtime: None,
             size_bytes: 0,
         }

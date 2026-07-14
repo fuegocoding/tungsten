@@ -47,6 +47,9 @@ pub struct Note {
     /// normalized to lowercase, without the leading `#`.
     pub tags: Vec<String>,
 
+    /// Callout blocks (`> [!type] Title\n> body`).
+    pub callouts: Vec<Callout>,
+
     /// Last-modified time, if the filesystem reported one.
     pub mtime: Option<SystemTime>,
 
@@ -110,20 +113,37 @@ pub struct UnlinkedMention {
     pub byte_range: Range<usize>,
 }
 
+/// A callout block: `> [!type] Title\n> body`. One of the
+/// 21 default Obsidian callout types or a custom type. The
+/// editor renders the title in a colored bar and folds the
+/// body until expanded.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Callout {
+    /// The callout kind: "note", "tip", "warning", "info", etc.
+    pub kind: String,
+    /// Optional title text after the type marker. The first line
+    /// of the callout, with the `> [!type] ` prefix stripped.
+    pub title: Option<String>,
+    /// Byte range of the entire callout (all its `>` lines,
+    /// including any nested ones) in the source.
+    pub byte_range: Range<usize>,
+}
+
 impl Note {
-    /// Read a note from disk. The file is fully loaded into memory;
-    /// for very large files a streaming parser would be preferable,
-    /// but `.md` files in note-taking vaults are typically <100 KB.
-    pub fn read(path: &Path) -> std::io::Result<Self> {
-        let content = std::fs::read_to_string(path)?;
-        let metadata = std::fs::metadata(path).ok();
-        let mtime = metadata.as_ref().and_then(|m| m.modified().ok());
-        let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
-        let mut note = parse_note(path, &content);
-        note.mtime = mtime;
-        note.size_bytes = size_bytes;
-        Ok(note)
-    }
+/// Read a note from disk. The file is fully loaded into memory;
+/// for very large files a streaming parser would be preferable,
+/// but `.md` files in note-taking vaults are typically <100 KB.
+pub fn read(path: &Path) -> std::io::Result<Self> {
+    let content = std::fs::read_to_string(path)?;
+    let metadata = std::fs::metadata(path).ok();
+    let mtime = metadata.as_ref().and_then(|m| m.modified().ok());
+    let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
+    let mut note = parse_note(path, &content);
+    note.mtime = mtime;
+    note.size_bytes = size_bytes;
+    Ok(note)
+}
+
 }
 
 /// Build a [`Note`] from a path and its raw content.
@@ -143,6 +163,7 @@ pub fn parse_note(path: &Path, content: &str) -> Note {
         frontmatter: parsed.frontmatter,
         links: parsed.links,
         tags: parsed.tags,
+        callouts: parsed.callouts,
         mtime: None,
         size_bytes: 0,
     }
@@ -165,6 +186,11 @@ pub struct FrontmatterAccess {
     #[serde(default)]
     pub aliases: Vec<String>,
 }
+
+/// Default Obsidian callout kinds, in display order.
+pub const DEFAULT_CALLOUT_KINDS: &[&str] = &[
+    "note", "tip", "info", "warning", "danger", "example", "question",
+];
 
 #[cfg(test)]
 mod tests {

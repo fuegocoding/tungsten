@@ -213,6 +213,7 @@ impl NoteIndex {
                     frontmatter,
                     links: Vec::new(), // filled in from the links table below
                     tags,
+                    callouts: Vec::new(),
                     mtime,
                     size_bytes: size_bytes as u64,
                 };
