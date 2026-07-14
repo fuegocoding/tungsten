@@ -653,6 +653,7 @@ fn main() {
             workspace_store,
             node_runtime,
             session: app_session,
+            tungsten_vault_name: None,
         });
         AppState::set_global(app_state.clone(), cx);
 
@@ -980,7 +981,26 @@ fn main() {
     });
 }
 
-fn handle_open_request(request: OpenRequest, app_state: Arc<AppState>, cx: &mut App) {
+fn handle_open_request(request: OpenRequest, mut app_state: Arc<AppState>, cx: &mut App) {
+    // Detect Tungsten vaults among the requested paths. The first
+    // path that resolves to a vault wins; we set AppState's
+    // `tungsten_vault_name` so the rest of the app can render
+    // vault-mode UI (hidden terminal panel, vault name in the
+    // status bar, etc.). `Arc::get_mut` only succeeds when the
+    // Arc has exactly one strong reference; on the request path
+    // that's the case before any windows are created.
+    for path_str in &request.open_paths {
+        let path = std::path::Path::new(path_str);
+        if let Some(vault) = tungsten_workspace::Vault::detect(path) {
+            let name = vault.name();
+            if let Some(state) = Arc::get_mut(&mut app_state) {
+                state.tungsten_vault_name = Some(name.clone());
+            }
+            eprintln!("[tungsten] Opened vault: {name} ({})", vault.root().display());
+            break;
+        }
+    }
+
     if let Some(kind) = request.kind {
         match kind {
             OpenRequestKind::CliConnection(connection) => {

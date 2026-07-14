@@ -1115,6 +1115,11 @@ pub struct AppState {
     pub build_window_options: fn(Option<Uuid>, &mut App) -> WindowOptions,
     pub node_runtime: NodeRuntime,
     pub session: Entity<AppSession>,
+    /// The name of the active Tungsten vault, if the user opened
+    /// a folder containing a `.obsidian/` directory. Set by
+    /// `handle_open_request` in the `zed` binary. `None` when the
+    /// opened folder is not a vault (e.g. a code-only repo).
+    pub tungsten_vault_name: Option<String>,
 }
 
 struct GlobalAppState(Arc<AppState>);
