@@ -127,6 +127,9 @@ pub use export::{build_export, Export, ExportCallout, ExportLink, ExportNote, Ex
 pub mod validate;
 pub use validate::{validate, Check, ValidationReport};
 
+pub mod snippet;
+pub use snippet::snippet;
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
