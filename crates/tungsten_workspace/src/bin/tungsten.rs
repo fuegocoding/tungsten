@@ -60,6 +60,7 @@ SUBCOMMANDS:
     sync          Encrypt vault state into a sync folder
     yip           Render a Year-in-Pixels SVG
     smart         List and evaluate smart folders
+    templates     List or render templates
     help          Print this list
 ";
 
@@ -138,6 +139,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "sync" => "tungsten-sync",
         "yip" => "tungsten-yip",
         "smart" => "tungsten-smart",
+        "templates" => "tungsten-templates",
         _ => return None,
     })
 }

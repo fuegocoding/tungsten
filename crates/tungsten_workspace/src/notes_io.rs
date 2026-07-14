@@ -45,11 +45,15 @@ pub enum NoteCreateError {
 }
 
 /// Variables available to templates.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TemplateVars {
     pub title: String,
     pub date: NaiveDate,
     pub time: NaiveTime,
+    /// User-supplied extras: project name, author, anything
+    /// a template wants. `{{key}}` lookups fall back here
+    /// when the standard vars don't match.
+    pub extras: std::collections::BTreeMap<String, String>,
 }
 
 impl TemplateVars {
@@ -61,6 +65,7 @@ impl TemplateVars {
             title,
             date: now.date_naive(),
             time: now.time(),
+            extras: std::collections::BTreeMap::new(),
         }
     }
 }
@@ -319,11 +324,19 @@ fn substitute(inner: &str, vars: &TemplateVars) -> String {
         return vars.time.format(fmt).to_string();
     }
     match trimmed {
-        "title" => vars.title.clone(),
-        "date" => vars.date.format("%Y-%m-%d").to_string(),
-        "time" => vars.time.format("%H:%M").to_string(),
-        other => format!("{{{{{other}}}}}"),
+        "title" => return vars.title.clone(),
+        "date" => return vars.date.format("%Y-%m-%d").to_string(),
+        "time" => return vars.time.format("%H:%M").to_string(),
+        _ => {}
     }
+    // Fall back to user-supplied extras, then leave the
+    // token verbatim (a common convention in template
+    // languages so missing values are visible in the
+    // output).
+    if let Some(value) = vars.extras.get(trimmed) {
+        return value.clone();
+    }
+    format!("{{{{{trimmed}}}}}")
 }
 
 fn default_daily_note(vars: &TemplateVars) -> String {
@@ -493,6 +506,7 @@ mod tests {
             title: "My Note".into(),
             date: NaiveDate::from_ymd_opt(2026, 7, 12).unwrap(),
             time: NaiveTime::from_hms_opt(8, 30, 0).unwrap(),
+            extras: std::collections::BTreeMap::new(),
         };
         let out = render_template(
             "# {{title}}\n\n{{date}} at {{time}}\n",
@@ -507,6 +521,7 @@ mod tests {
             title: "x".into(),
             date: NaiveDate::from_ymd_opt(2026, 7, 12).unwrap(),
             time: NaiveTime::from_hms_opt(8, 30, 0).unwrap(),
+            extras: std::collections::BTreeMap::new(),
         };
         let out = render_template("{{date:%Y/%m/%d}}\n{{time:%H:%M:%S}}", &vars);
         assert_eq!(out, "2026/07/12\n08:30:00");
@@ -518,6 +533,7 @@ mod tests {
             title: "x".into(),
             date: NaiveDate::from_ymd_opt(2026, 7, 12).unwrap(),
             time: NaiveTime::from_hms_opt(8, 30, 0).unwrap(),
+            extras: std::collections::BTreeMap::new(),
         };
         let out = render_template("hello {{foo}}", &vars);
         assert_eq!(out, "hello {{foo}}");

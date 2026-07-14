@@ -118,6 +118,9 @@ pub use yip::{YipCell, YipGrid, YipSvg};
 pub mod smart_folder;
 pub use smart_folder::{discover as discover_smart_folders, evaluate_all, parse as parse_smart_folder, SmartFolder};
 
+pub mod templates;
+pub use templates::{default_vars, discover as discover_templates, format_date_token, render as render_template_body, vars_with_extras, Template, TemplateRegistry};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
