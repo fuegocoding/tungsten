@@ -56,6 +56,11 @@ pub use canvas::{
 pub mod publish;
 pub use publish::{render_full_page, render_frontmatter_table, render_html};
 
+pub mod bases;
+pub use bases::{
+    Base, BaseRow, BaseView, BaseViewKind, Filter, FilterOp, NamedFormula, Sort,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
