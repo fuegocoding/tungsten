@@ -64,3 +64,7 @@ path = "src/bin/tungsten_find_broken.rs"
 [[bin]]
 name = "tungsten-canvas"
 path = "src/bin/tungsten_canvas.rs"
+
+[[bin]]
+name = "tungsten-publish"
+path = "src/bin/tungsten_publish.rs"
