@@ -34,3 +34,7 @@ path = "src/bin/tungsten_vault.rs"
 [[bin]]
 name = "tungsten-index"
 path = "src/bin/tungsten_index.rs"
+
+[[bin]]
+name = "tungsten-query"
+path = "src/bin/tungsten_query.rs"
