@@ -60,3 +60,7 @@ path = "src/bin/tungsten_grep.rs"
 [[bin]]
 name = "tungsten-find-broken"
 path = "src/bin/tungsten_find_broken.rs"
+
+[[bin]]
+name = "tungsten-canvas"
+path = "src/bin/tungsten_canvas.rs"

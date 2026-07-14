@@ -47,6 +47,12 @@ pub use vault_sidecar::{
 pub mod watcher;
 pub use watcher::{NoteEvent, NoteWatcher, WatcherError};
 
+pub mod canvas;
+pub use canvas::{
+    Canvas, CanvasDimensions, CanvasEdge, CanvasNode, CanvasPosition, Color, FileNode, FileSubtype,
+    GroupNode, LinkNode, NodeBase, Side, TextNode,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
