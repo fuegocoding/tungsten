@@ -50,3 +50,7 @@ path = "src/bin/tungsten_rename.rs"
 [[bin]]
 name = "tungsten-backlinks"
 path = "src/bin/tungsten_backlinks.rs"
+
+[[bin]]
+name = "tungsten-grep"
+path = "src/bin/tungsten_grep.rs"
