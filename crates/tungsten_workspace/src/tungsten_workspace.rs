@@ -115,6 +115,9 @@ pub use sync::{reconcile, write_log, Op, SyncEnvelope, SyncKey, SyncLog, SyncMan
 pub mod yip;
 pub use yip::{YipCell, YipGrid, YipSvg};
 
+pub mod smart_folder;
+pub use smart_folder::{discover as discover_smart_folders, evaluate_all, parse as parse_smart_folder, SmartFolder};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

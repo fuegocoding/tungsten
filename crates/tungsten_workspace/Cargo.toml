@@ -115,3 +115,7 @@ path = "src/bin/tungsten_sync.rs"
 [[bin]]
 name = "tungsten-yip"
 path = "src/bin/tungsten_yip.rs"
+
+[[bin]]
+name = "tungsten-smart"
+path = "src/bin/tungsten_smart.rs"

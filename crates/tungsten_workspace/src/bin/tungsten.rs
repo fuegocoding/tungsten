@@ -59,6 +59,7 @@ SUBCOMMANDS:
     init          Initialize a vault's sidecar state
     sync          Encrypt vault state into a sync folder
     yip           Render a Year-in-Pixels SVG
+    smart         List and evaluate smart folders
     help          Print this list
 ";
 
@@ -136,6 +137,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "init" => "tungsten-init",
         "sync" => "tungsten-sync",
         "yip" => "tungsten-yip",
+        "smart" => "tungsten-smart",
         _ => return None,
     })
 }
