@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod reliability;
+mod tungsten_status;
 mod zed;
 
 // Ensure the binary name stays in sync with APP_NAME so that the paths used
@@ -996,6 +997,13 @@ fn handle_open_request(request: OpenRequest, mut app_state: Arc<AppState>, cx: &
             if let Some(state) = Arc::get_mut(&mut app_state) {
                 state.tungsten_vault_name = Some(name.clone());
             }
+            // Update the GPUI global that the status bar item
+            // reads. The global may not yet be set (the status
+            // bar hasn't been created yet on this code path),
+            // so we set_global unconditionally; a later
+            // `try_global` in the status bar item will see the
+            // updated value.
+            cx.set_global(tungsten_status::TungstenVaultName(Some(name.clone())));
             // Persist the sidecar state file (creates .tungsten/
             // on first open). Best-effort: log and continue.
             let now_unix_secs = std::time::SystemTime::now()
