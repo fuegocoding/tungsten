@@ -140,6 +140,46 @@ impl<'a> NoteCreator<'a> {
         Ok(abs)
     }
 
+    /// Create a note at an *absolute* path. Unlike
+    /// [`Self::create`], the path is not resolved against the
+    /// vault root — it's used as-is. The note is parsed and
+    /// returned so the caller can use it directly.
+    pub fn create_with_path(
+        &self,
+        abs_path: &Path,
+        _title: &str,
+        body: &str,
+    ) -> Result<Note, NoteCreateError> {
+        if abs_path.exists() {
+            return Err(NoteCreateError::AlreadyExists(abs_path.to_path_buf()));
+        }
+        if let Some(parent) = abs_path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent).map_err(|source| NoteCreateError::Io {
+                    path: parent.to_path_buf(),
+                    source,
+                })?;
+            }
+        }
+        fs::write(abs_path, body).map_err(|source| NoteCreateError::Io {
+            path: abs_path.to_path_buf(),
+            source,
+        })?;
+        crate::note::Note::read(abs_path).map_err(|source| NoteCreateError::Io {
+            path: abs_path.to_path_buf(),
+            source,
+        })
+    }
+
+    /// Read a note from an absolute path. The note is parsed
+    /// via the standard [`Note::read`] loader.
+    pub fn read(&self, abs_path: &Path) -> Result<Note, NoteCreateError> {
+        Note::read(abs_path).map_err(|source| NoteCreateError::Io {
+            path: abs_path.to_path_buf(),
+            source,
+        })
+    }
+
     /// Create (or locate) today's daily note. Idempotent: if the
     /// file already exists, the path is returned without modifying
     /// the file.

@@ -88,6 +88,12 @@ pub use panel::{
     FileTreeData, FileTreeRow, Panel, PropertiesData, PropertyRow, TagData, TagRow,
 };
 
+pub mod journal;
+pub use journal::{
+    calendar, create_for_date, create_today, daily_note_path, default_widgets, journal_home,
+    mood_trend, render_daily_body, JournalConfig, MoodRow, Widget, WidgetRegistry,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
