@@ -6,10 +6,15 @@
 //!         root, config dir, and a one-line summary of the loaded
 //!         .obsidian/ config (theme, font size, accent color, plugin
 //!         counts, snippet count, hotkey/plugin/theme catalog).
+//!         Also writes `.tungsten/state.json` (idempotent; safe
+//!         to re-run).
 //!
 //!     tungsten-vault --detect <PATH>
 //!         Same as above but only walks up looking for .obsidian/;
 //!         does not require the path to be a vault root.
+//!
+//!     tungsten-vault --no-state <PATH>
+//!         Same as the default but skip the sidecar write.
 
 use std::process::ExitCode;
 
@@ -17,20 +22,28 @@ use tungsten_workspace::{TungstenWorkspace, Vault};
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() < 2 || args.len() > 3 || args[1] == "--help" || args[1] == "-h" {
-        eprintln!("usage: tungsten-vault <PATH> | --detect <PATH>");
+    if args.iter().any(|a| a == "--help" || a == "-h") {
+        eprintln!(
+            "usage: tungsten-vault [--detect] [--no-state] <PATH>\n\
+             \n\
+             Detect a vault at PATH (or above) and print its name, root, and\n\
+             config-dir summary. Also writes .tungsten/state.json (idempotent)\n\
+             unless --no-state is passed."
+        );
         return ExitCode::from(2);
     }
-
-    let (detect_mode, path) = if args[1] == "--detect" {
-        if args.len() != 3 {
-            eprintln!("--detect requires a PATH");
-            return ExitCode::from(2);
-        }
-        (true, std::path::PathBuf::from(&args[2]))
-    } else {
-        (false, std::path::PathBuf::from(&args[1]))
-    };
+    let no_state = args.iter().any(|a| a == "--no-state");
+    let detect_mode = args.iter().any(|a| a == "--detect");
+    let positional: Vec<&String> = args
+        .iter()
+        .skip(1)
+        .filter(|a| !a.starts_with("--"))
+        .collect();
+    if positional.len() != 1 {
+        eprintln!("usage: tungsten-vault [--detect] [--no-state] <PATH>");
+        return ExitCode::from(2);
+    }
+    let path = std::path::PathBuf::from(positional[0]);
 
     let vault: Option<Vault> = if detect_mode {
         Vault::detect(&path)
@@ -42,6 +55,17 @@ fn main() -> ExitCode {
         eprintln!("No vault found at or above {}", path.display());
         return ExitCode::from(1);
     };
+
+    if !no_state {
+        let now_unix_secs = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        match tungsten_workspace::write_state(&vault, now_unix_secs) {
+            Ok(path) => println!("Sidecar:         {}", path.display()),
+            Err(e) => eprintln!("Sidecar write failed: {e}"),
+        }
+    }
 
     println!("Vault:           {}", vault.name());
     println!("Root:            {}", vault.root().display());
