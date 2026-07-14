@@ -99,3 +99,7 @@ path = "src/bin/tungsten_inspect.rs"
 [[bin]]
 name = "tungsten-plugins"
 path = "src/bin/tungsten_plugins.rs"
+
+[[bin]]
+name = "tungsten-themes"
+path = "src/bin/tungsten_themes.rs"

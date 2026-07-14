@@ -103,6 +103,12 @@ pub use plugin_api::{
     PluginRegistry, ShimMethod,
 };
 
+pub mod theme;
+pub use theme::{
+    base_theme, list_themes, load_from_path, parse_css, parse_metadata, Theme, ThemeMeta,
+    ThemeMode, KNOWN_VARIABLES,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
