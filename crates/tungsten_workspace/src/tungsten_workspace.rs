@@ -39,6 +39,11 @@ pub use dql::{
     SourceType, Token, WhereClause, WhereNode,
 };
 
+pub mod vault_sidecar;
+pub use vault_sidecar::{
+    ensure_sidecar_dir, read_state, write_state, VaultState, STATE_SCHEMA_VERSION,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,

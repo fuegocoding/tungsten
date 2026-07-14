@@ -996,7 +996,21 @@ fn handle_open_request(request: OpenRequest, mut app_state: Arc<AppState>, cx: &
             if let Some(state) = Arc::get_mut(&mut app_state) {
                 state.tungsten_vault_name = Some(name.clone());
             }
-            eprintln!("[tungsten] Opened vault: {name} ({})", vault.root().display());
+            // Persist the sidecar state file (creates .tungsten/
+            // on first open). Best-effort: log and continue.
+            let now_unix_secs = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
+            match tungsten_workspace::write_state(&vault, now_unix_secs) {
+                Ok(_) => eprintln!(
+                    "[tungsten] Opened vault: {name} ({})",
+                    vault.root().display()
+                ),
+                Err(e) => eprintln!(
+                    "[tungsten] Opened vault: {name} (state write failed: {e})"
+                ),
+            }
             break;
         }
     }
