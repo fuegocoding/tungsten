@@ -67,6 +67,12 @@ pub use eaar::{decrypt, decrypt_file, derive_key, encrypt, encrypt_file, EaRErro
 pub mod preview;
 pub use preview::{compute_overlays, Overlay, OverlayKind};
 
+pub mod property;
+pub use property::{
+    parse_types_json, validate as validate_properties, PropertyError, PropertyKind, PropertySchema,
+    PropertySchemaSet,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
