@@ -97,6 +97,12 @@ pub use journal::{
 pub mod inspector;
 pub use inspector::{build_report, BrokenTarget, FolderCount, InspectorReport, NoteSummary, TagCount};
 
+pub mod plugin_api;
+pub use plugin_api::{
+    discover, parse_enabled_list, parse_manifest, shim_surface, InstalledPlugin, PluginManifest,
+    PluginRegistry, ShimMethod,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
