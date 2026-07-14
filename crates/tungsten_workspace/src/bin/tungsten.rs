@@ -61,6 +61,7 @@ SUBCOMMANDS:
     yip           Render a Year-in-Pixels SVG
     smart         List and evaluate smart folders
     templates     List or render templates
+    export        Export a vault to a JSON document
     help          Print this list
 ";
 
@@ -140,6 +141,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "yip" => "tungsten-yip",
         "smart" => "tungsten-smart",
         "templates" => "tungsten-templates",
+        "export" => "tungsten-export",
         _ => return None,
     })
 }

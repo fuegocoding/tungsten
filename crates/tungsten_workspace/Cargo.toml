@@ -123,3 +123,7 @@ path = "src/bin/tungsten_smart.rs"
 [[bin]]
 name = "tungsten-templates"
 path = "src/bin/tungsten_templates.rs"
+
+[[bin]]
+name = "tungsten-export"
+path = "src/bin/tungsten_export.rs"
