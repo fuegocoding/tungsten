@@ -94,6 +94,9 @@ pub use journal::{
     mood_trend, render_daily_body, JournalConfig, MoodRow, Widget, WidgetRegistry,
 };
 
+pub mod inspector;
+pub use inspector::{build_report, BrokenTarget, FolderCount, InspectorReport, NoteSummary, TagCount};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
