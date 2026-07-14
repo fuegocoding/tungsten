@@ -71,3 +71,11 @@ path = "src/bin/tungsten_canvas.rs"
 [[bin]]
 name = "tungsten-publish"
 path = "src/bin/tungsten_publish.rs"
+
+[[bin]]
+name = "tungsten-encrypt"
+path = "src/bin/tungsten_eaar.rs"
+
+[[bin]]
+name = "tungsten-decrypt"
+path = "src/bin/tungsten_eaar.rs"
