@@ -87,3 +87,7 @@ path = "src/bin/tungsten_graph.rs"
 [[bin]]
 name = "tungsten-switcher"
 path = "src/bin/tungsten_switcher.rs"
+
+[[bin]]
+name = "tungsten-outline"
+path = "src/bin/tungsten_outline.rs"

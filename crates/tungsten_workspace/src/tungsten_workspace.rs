@@ -79,6 +79,9 @@ pub use graph::{build_graph, layout, Edge, ForceParams, Layout, Node, Position};
 pub mod quick_switcher;
 pub use quick_switcher::{quick_switch, MatchKind, SwitcherHit};
 
+pub mod outline;
+pub use outline::{heading_at, outline, outline_for_path, vault_outline, Heading};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
