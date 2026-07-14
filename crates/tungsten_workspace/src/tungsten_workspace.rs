@@ -61,6 +61,9 @@ pub use bases::{
     Base, BaseRow, BaseView, BaseViewKind, Filter, FilterOp, NamedFormula, Sort,
 };
 
+pub mod eaar;
+pub use eaar::{decrypt, decrypt_file, derive_key, encrypt, encrypt_file, EaRError};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
