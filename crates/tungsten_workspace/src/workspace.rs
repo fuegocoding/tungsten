@@ -18,9 +18,10 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::obsidian_config::{ObsidianConfig, ObsidianConfigError};
+use crate::OBSIDIAN_CONFIG_DIR;
 use crate::Vault;
 
-/// Errors that can occur while managing the workspace.
+    /// Errors that can occur while managing the workspace.
 #[derive(Debug, thiserror::Error)]
 pub enum WorkspaceError {
     #[error("path is not a vault (no .obsidian/ directory): {0}")]
@@ -31,6 +32,12 @@ pub enum WorkspaceError {
     NotFound(PathBuf),
     #[error("config error: {0}")]
     Config(#[from] ObsidianConfigError),
+    #[error("io error on {path}: {source}")]
+    Io {
+        path: PathBuf,
+        #[source]
+        source: std::io::Error,
+    },
 }
 
 /// One open vault: the [`Vault`] itself plus its lazily-loaded config.
@@ -58,6 +65,43 @@ impl TungstenWorkspace {
         Self::default()
     }
 
+    /// Initialize a new vault at `path`. Creates:
+    /// - `.obsidian/` (the config dir; empty by default; Obsidian
+    ///   fills it in on first open)
+    /// - `.tungsten/` (the Tungsten sidecar dir)
+    /// - `.tungsten/state.json` (initial state)
+    /// - `Welcome.md` (a starter note, only if not present)
+    ///
+    /// The function is idempotent: existing files are not
+    /// overwritten. The new vault is opened and returned via
+    /// [`Self::open_vault`].
+    pub fn init_vault(
+        &mut self,
+        path: &Path,
+        now_unix_secs: u64,
+    ) -> Result<&Vault, WorkspaceError> {
+        let obsidian = path.join(OBSIDIAN_CONFIG_DIR);
+        std::fs::create_dir_all(&obsidian).map_err(|source| WorkspaceError::Io {
+            path: obsidian,
+            source,
+        })?;
+        let vault = Vault::open(path).ok_or_else(|| WorkspaceError::NotAVault(path.to_path_buf()))?;
+        crate::vault_sidecar::write_state(&vault, now_unix_secs).map_err(|source| {
+            WorkspaceError::Io {
+                path: vault.root().join(".tungsten/state.json"),
+                source,
+            }
+        })?;
+        let welcome = path.join("Welcome.md");
+        if !welcome.is_file() {
+            std::fs::write(&welcome, WELCOME_NOTE).map_err(|source| WorkspaceError::Io {
+                path: welcome,
+                source,
+            })?;
+        }
+        self.open_vault_inner(vault, true)
+    }
+
     /// Open `path` as a vault. Fails if `path` does not contain a
     /// `.obsidian/` directory. Becomes the active vault if no other
     /// vault is active.
@@ -80,7 +124,7 @@ impl TungstenWorkspace {
         self.open_vault_inner(vault, set_active_if_none)
     }
 
-    fn open_vault_inner(
+    pub(crate) fn open_vault_inner(
         &mut self,
         vault: Vault,
         set_active_if_none: bool,
@@ -179,6 +223,12 @@ impl TungstenWorkspace {
 fn canonicalize_or_original(path: &Path) -> PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
+
+const WELCOME_NOTE: &str = "# Welcome to your new Tungsten vault\n\n\
+This vault was initialized by the Tungsten CLI. Open it in the GUI to start writing.\n\
+\n\
+The vault is stored as plain Markdown on disk; you can open the same folder in Obsidian or\n\
+any other Markdown editor at any time.\n";
 
 #[cfg(test)]
 mod tests {
@@ -350,6 +400,50 @@ mod tests {
         let v = ws.open_vault(vault, true).unwrap();
         assert_eq!(v.root(), dir);
         assert_eq!(ws.active().unwrap().root(), dir);
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn init_vault_creates_required_layout() {
+        // Start with an empty dir (no .obsidian yet).
+        let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let pid = std::process::id();
+        let dir = std::env::temp_dir().join(format!("tungsten-init-{pid}-{n}"));
+        fs::create_dir_all(&dir).unwrap();
+        let mut ws = TungstenWorkspace::new();
+        let vault = ws.init_vault(&dir, 1_700_000_000).unwrap();
+        // .obsidian/ exists and is empty
+        assert!(vault.config_dir().is_dir());
+        // .tungsten/state.json exists and is parseable
+        let state = crate::vault_sidecar::read_state(&dir).unwrap().unwrap();
+        assert_eq!(state.vault_name, dir.file_name().unwrap().to_str().unwrap());
+        // Welcome.md exists
+        let welcome = dir.join("Welcome.md");
+        assert!(welcome.is_file());
+        let body = fs::read_to_string(&welcome).unwrap();
+        assert!(body.contains("Welcome"));
+        // Vault is registered
+        assert_eq!(ws.active().unwrap().root(), dir.canonicalize().unwrap());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn init_vault_is_idempotent() {
+        let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let pid = std::process::id();
+        let dir = std::env::temp_dir().join(format!("tungsten-init-idem-{pid}-{n}"));
+        fs::create_dir_all(&dir).unwrap();
+        let mut ws = TungstenWorkspace::new();
+        ws.init_vault(&dir, 1_700_000_000).unwrap();
+        // Pre-existing Welcome.md should not be overwritten
+        let custom = "# my custom welcome\n";
+        fs::write(dir.join("Welcome.md"), custom).unwrap();
+        // Close the vault so we can re-init (idempotency is about
+        // filesystem writes, not workspace registration).
+        ws.close(&dir);
+        ws.init_vault(&dir, 1_700_000_001).unwrap();
+        let body = fs::read_to_string(dir.join("Welcome.md")).unwrap();
+        assert_eq!(body, custom, "Welcome.md should not be overwritten");
         fs::remove_dir_all(&dir).ok();
     }
 }
