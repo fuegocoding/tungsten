@@ -82,6 +82,12 @@ pub use quick_switcher::{quick_switch, MatchKind, SwitcherHit};
 pub mod outline;
 pub use outline::{heading_at, outline, outline_for_path, vault_outline, Heading};
 
+pub mod panel;
+pub use panel::{
+    backlinks, bookmarks, file_tree, outline_rows, properties, tags, BacklinkData, BookmarkData,
+    FileTreeData, FileTreeRow, Panel, PropertiesData, PropertyRow, TagData, TagRow,
+};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
