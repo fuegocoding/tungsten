@@ -151,6 +151,11 @@ actions!(
         TestPanic,
         /// Triggers a hard crash for debugging.
         TestCrash,
+        /// Creates (or opens) today's daily note in the active Tungsten
+        /// vault. The default folder is `Journal/` and the default
+        /// filename format is `YYYY-MM-DD.md` (idempotent: opens the
+        /// existing file if today's note is already there).
+        OpenDailyNote,
     ]
 );
 
@@ -226,6 +231,11 @@ pub fn init(cx: &mut App) {
                 window,
                 cx,
             );
+        });
+    })
+    .on_action(|_: &OpenDailyNote, cx| {
+        with_active_or_new_workspace(cx, |workspace, window, cx| {
+            open_tungsten_daily_note(workspace, window, cx);
         });
     })
     .on_action(|&zed_actions::OpenKeymapFile, cx| {
@@ -2470,6 +2480,47 @@ fn open_local_file(
     }
 }
 
+fn open_tungsten_daily_note(
+    workspace: &mut Workspace,
+    window: &mut Window,
+    cx: &mut Context<Workspace>,
+) {
+    // Find the workspace's primary worktree to use as the vault
+    // root. In a single-vault setup the workspace has exactly one
+    // worktree, but multi-root workspaces are possible; we use
+    // the first.
+    let worktree = workspace.worktrees(cx).next();
+    let Some(worktree) = worktree else {
+        log::warn!("OpenDailyNote: workspace has no worktrees");
+        return;
+    };
+    let root: std::path::PathBuf = worktree
+        .read(cx)
+        .abs_path()
+        .as_ref()
+        .to_path_buf();
+    let Some(vault) = tungsten_workspace::Vault::open(&root) else {
+        log::warn!(
+            "OpenDailyNote: {} is not a Tungsten vault (no .obsidian/)",
+            root.display()
+        );
+        return;
+    };
+    let mut creator = tungsten_workspace::NoteCreator::new(&vault);
+    let now = chrono::Local::now();
+    let path = match creator.create_daily(now) {
+        Ok(p) => p,
+        Err(e) => {
+            log::error!("OpenDailyNote: create_daily failed: {e}");
+            return;
+        }
+    };
+    let path = path.canonicalize().unwrap_or(path);
+    let open_options = workspace::OpenOptions::default();
+    let _ = workspace.open_paths(vec![path], open_options, None, window, cx);
+}
+
+/// Create (or open) today's daily note in the active Tungsten vault.
 fn open_bundled_file(
     workspace: &mut Workspace,
     text: Cow<'static, str>,
