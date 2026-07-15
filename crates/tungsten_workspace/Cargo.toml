@@ -139,3 +139,7 @@ path = "src/bin/tungsten_stats.rs"
 [[bin]]
 name = "tungsten-shell"
 path = "src/bin/tungsten_shell.rs"
+
+[[bin]]
+name = "tungsten-graph-viz"
+path = "src/bin/tungsten_graph_viz.rs"
