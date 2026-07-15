@@ -43,6 +43,7 @@ SUBCOMMANDS:
     outline       Heading outline for one or all notes
     switcher      Quick switcher (cmd-O) lookup
     graph         Force-directed layout of the link graph
+    graph-viz     Emit Graphviz DOT for the link graph
     search        Free-text search across notes
     backlinks     Incoming links to a note
     broken        Unresolved wikilinks
@@ -53,17 +54,21 @@ SUBCOMMANDS:
     decrypt       Decrypt a file
     plugins       List installed community plugins
     themes        List installed themes / base theme
+    templates     List or render templates
     vault         Vault config dump
     index         Rebuild the SQLite index
     query         Run a DQL query
+    shell         Interactive DQL REPL
     init          Initialize a vault's sidecar state
     sync          Encrypt vault state into a sync folder
     yip           Render a Year-in-Pixels SVG
     smart         List and evaluate smart folders
-    templates     List or render templates
     export        Export a vault to a JSON document
     validate      Run pass/fail checks on a vault
     stats         Word counts and reading time
+    diff          List notes changed in a date range
+    doctor        Aggregate health report
+    mood          Quick mood logger
     help          Print this list
 ";
 
@@ -125,6 +130,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "outline" => "tungsten-outline",
         "switcher" => "tungsten-switcher",
         "graph" => "tungsten-graph",
+        "graph-viz" => "tungsten-graph-viz",
         "search" => "tungsten-grep",
         "backlinks" => "tungsten-backlinks",
         "broken" | "find-broken" => "tungsten-find-broken",
@@ -135,17 +141,21 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "decrypt" => "tungsten-decrypt",
         "plugins" => "tungsten-plugins",
         "themes" => "tungsten-themes",
+        "templates" => "tungsten-templates",
         "vault" => "tungsten-vault",
         "index" => "tungsten-index",
         "query" => "tungsten-query",
+        "shell" => "tungsten-shell",
         "init" => "tungsten-init",
         "sync" => "tungsten-sync",
         "yip" => "tungsten-yip",
         "smart" => "tungsten-smart",
-        "templates" => "tungsten-templates",
         "export" => "tungsten-export",
         "validate" => "tungsten-validate",
         "stats" => "tungsten-stats",
+        "diff" => "tungsten-diff",
+        "doctor" => "tungsten-doctor",
+        "mood" => "tungsten-mood",
         _ => return None,
     })
 }
