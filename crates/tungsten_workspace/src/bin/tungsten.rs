@@ -74,6 +74,8 @@ SUBCOMMANDS:
     canvas-list   List every canvas file
     random        Pick a random note
     demo          Create an example vault for learning
+    search        Regex search with snippets
+    replace       Bulk regex find-and-replace
     help          Print this list
 ";
 
@@ -166,6 +168,8 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "canvas-list" => "tungsten-canvas-list",
         "random" => "tungsten-random",
         "demo" => "tungsten-demo",
+        "search" => "tungsten-search",
+        "replace" => "tungsten-replace",
         _ => return None,
     })
 }
