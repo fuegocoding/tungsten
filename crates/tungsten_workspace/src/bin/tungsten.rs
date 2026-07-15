@@ -63,6 +63,7 @@ SUBCOMMANDS:
     templates     List or render templates
     export        Export a vault to a JSON document
     validate      Run pass/fail checks on a vault
+    stats         Word counts and reading time
     help          Print this list
 ";
 
@@ -144,6 +145,7 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "templates" => "tungsten-templates",
         "export" => "tungsten-export",
         "validate" => "tungsten-validate",
+        "stats" => "tungsten-stats",
         _ => return None,
     })
 }

@@ -130,6 +130,9 @@ pub use validate::{validate, Check, ValidationReport};
 pub mod snippet;
 pub use snippet::snippet;
 
+pub mod stats;
+pub use stats::{compute as compute_stats, NoteStat, VaultStats, WordHistogram};
+
 pub use note::{Link, LinkKind, Note, UnlinkedMention, Callout, DEFAULT_CALLOUT_KINDS};
 pub use obsidian_config::{
     AppearanceConfig, AppConfig, NewLinkFormat, ObsidianConfig, ObsidianConfigError, PluginInfo,
