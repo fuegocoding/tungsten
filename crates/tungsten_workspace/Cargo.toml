@@ -155,3 +155,7 @@ path = "src/bin/tungsten_doctor.rs"
 [[bin]]
 name = "tungsten-mood"
 path = "src/bin/tungsten_mood.rs"
+
+[[bin]]
+name = "tungsten-tasks"
+path = "src/bin/tungsten_tasks.rs"
