@@ -147,3 +147,7 @@ path = "src/bin/tungsten_graph_viz.rs"
 [[bin]]
 name = "tungsten-diff"
 path = "src/bin/tungsten_diff.rs"
+
+[[bin]]
+name = "tungsten-doctor"
+path = "src/bin/tungsten_doctor.rs"
