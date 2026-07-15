@@ -69,6 +69,9 @@ SUBCOMMANDS:
     diff          List notes changed in a date range
     doctor        Aggregate health report
     mood          Quick mood logger
+    tasks         Aggregate open task markers
+    graph-stats   Link graph statistics
+    canvas-list   List every canvas file
     help          Print this list
 ";
 
@@ -156,6 +159,9 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "diff" => "tungsten-diff",
         "doctor" => "tungsten-doctor",
         "mood" => "tungsten-mood",
+        "tasks" => "tungsten-tasks",
+        "graph-stats" => "tungsten-graph-stats",
+        "canvas-list" => "tungsten-canvas-list",
         _ => return None,
     })
 }
