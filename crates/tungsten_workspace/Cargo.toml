@@ -175,3 +175,7 @@ path = "src/bin/tungsten_random.rs"
 [[bin]]
 name = "tungsten-demo"
 path = "src/bin/tungsten_demo.rs"
+
+[[bin]]
+name = "tungsten-search"
+path = "src/bin/tungsten_search.rs"
