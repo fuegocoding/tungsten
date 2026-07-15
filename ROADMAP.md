@@ -1,7 +1,7 @@
 # Tungsten — Roadmap
 
 **Status:** Active development (v0.3 — Zed-based)
-**Last updated:** 2026-07-14
+**Last updated:** 2026-07-15
 **Horizon:** 2026 Q3 → 2029
 **Total duration:** ~6 months to v1.0 alpha, 12–18 months to v1.0 stable,
 then post-1.0 features through 2029.
@@ -28,26 +28,36 @@ then post-1.0 features through 2029.
 ## What this looks like today
 
 The `tungsten_workspace` library is the implementation of the data
-layer for milestones M0.2 through M6. It compiles to 21 binaries
+layer for milestones M0.2 through M6. It compiles to 34 binaries
 (`tungsten-*` for each subsystem plus a `twctl` umbrella dispatcher)
-and ships with **295 passing unit tests** (zero warnings on the test
-suite). It is the foundation the GPUI view layer and the eventual
-Obsidian compat runtime will sit on top of.
+and ships with **343 passing unit tests**. It is the foundation the
+GPUI view layer and the eventual Obsidian compat runtime will sit
+on top of.
 
 ### Binaries (run `./target/debug/twctl help` for the list)
 
 - `tungsten` — main GUI (forked from `zed`, rebrand only)
 - `twctl` — umbrella command dispatching to the per-task tools
-- `tungsten-vault`, `tungsten-init` — vault detection / sidecar state
-- `tungsten-index`, `tungsten-query`, `tungsten-rename`,
-  `tungsten-backlinks`, `tungsten-grep`, `tungsten-find-broken` —
-  knowledge layer (M1.2)
-- `tungsten-switcher`, `tungsten-outline`, `tungsten-graph` —
-  sidebar data (M2.1)
-- `tungsten-canvas`, `tungsten-publish` — Canvas / publish (M4 / M6)
+- `tungsten-vault`, `tungsten-init`, `tungsten-demo` — vault
+  detection, sidecar state, example-vault scaffolder
+- `tungsten-index`, `tungsten-query`, `tungsten-shell`,
+  `tungsten-rename`, `tungsten-backlinks`, `tungsten-grep`,
+  `tungsten-find-broken` — knowledge layer (M1.2)
+- `tungsten-switcher`, `tungsten-outline`, `tungsten-graph`,
+  `tungsten-graph-viz`, `tungsten-graph-stats` — sidebar
+  data and graph views (M1.2 / M2.1)
+- `tungsten-canvas`, `tungsten-canvas-list`, `tungsten-publish` —
+  Canvas / publish (M4 / M6)
 - `tungsten-encrypt`, `tungsten-decrypt` — EaaR (M5)
-- `tungsten-plugins`, `tungsten-themes` — Obsidian compat foundation (M3)
-- `tungsten-inspect` — diagnostic dump (used by CI and humans)
+- `tungsten-plugins`, `tungsten-themes`, `tungsten-templates` —
+  Obsidian compat foundation (M3)
+- `tungsten-smart`, `tungsten-yip`, `tungsten-journal` —
+  M2.2 surface tools
+- `tungsten-inspect`, `tungsten-validate`, `tungsten-doctor`,
+  `tungsten-stats`, `tungsten-diff`, `tungsten-tasks`,
+  `tungsten-mood`, `tungsten-random`, `tungsten-export`,
+  `tungsten-sync`, `tungsten-snippet` — diagnostic and
+  maintenance CLIs
 
 ---
 

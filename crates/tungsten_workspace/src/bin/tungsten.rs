@@ -72,6 +72,8 @@ SUBCOMMANDS:
     tasks         Aggregate open task markers
     graph-stats   Link graph statistics
     canvas-list   List every canvas file
+    random        Pick a random note
+    demo          Create an example vault for learning
     help          Print this list
 ";
 
@@ -162,6 +164,8 @@ fn map_subcommand(sub: &str) -> Option<&'static str> {
         "tasks" => "tungsten-tasks",
         "graph-stats" => "tungsten-graph-stats",
         "canvas-list" => "tungsten-canvas-list",
+        "random" => "tungsten-random",
+        "demo" => "tungsten-demo",
         _ => return None,
     })
 }
