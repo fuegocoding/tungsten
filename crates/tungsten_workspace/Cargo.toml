@@ -163,3 +163,7 @@ path = "src/bin/tungsten_tasks.rs"
 [[bin]]
 name = "tungsten-graph-stats"
 path = "src/bin/tungsten_graph_stats.rs"
+
+[[bin]]
+name = "tungsten-canvas-list"
+path = "src/bin/tungsten_canvas_list.rs"
