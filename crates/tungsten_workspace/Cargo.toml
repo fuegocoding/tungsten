@@ -135,3 +135,7 @@ path = "src/bin/tungsten_validate.rs"
 [[bin]]
 name = "tungsten-stats"
 path = "src/bin/tungsten_stats.rs"
+
+[[bin]]
+name = "tungsten-shell"
+path = "src/bin/tungsten_shell.rs"
