@@ -159,3 +159,7 @@ path = "src/bin/tungsten_mood.rs"
 [[bin]]
 name = "tungsten-tasks"
 path = "src/bin/tungsten_tasks.rs"
+
+[[bin]]
+name = "tungsten-graph-stats"
+path = "src/bin/tungsten_graph_stats.rs"
